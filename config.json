@@ -1,0 +1,7 @@
+{
+    "data_path": "./data/documents",
+    "file_type": "*.pdf",
+    "embedding_model": "openai",
+    "vectorstore_path": "./data/vectorstore",
+    "chat_model": "gpt-4o-mini"
+}
