@@ -1,0 +1,12 @@
+.env : 
+- API-KEY : api키 저장(together.ai)
+- SYSTEM_MESSAGE : 챗봇 성격 저장
+
+main.py : 챗봇 코드 작성
+- MODEL = "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
+
+설치한 것들 ;
+pip install openai python-dotenv
+
+과제 :
+- together.ai 아닌 다른 api 사용해서 챗봇 만들기 
