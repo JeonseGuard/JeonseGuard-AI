@@ -92,7 +92,7 @@ def separate_part_3(part_3_path):
     
     part_3 = cv2.imread(part_3_path)
     binary_image = get_binary_image(part_3)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1500, 10))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1500, 20))
     dilated_image = cv2.dilate(binary_image, kernel, iterations = 3)
     contours, _ = cv2.findContours(dilated_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -101,16 +101,13 @@ def separate_part_3(part_3_path):
         x, y, w, h = cv2.boundingRect(contour)
         boxes.append((x, y, w, h))
     boxes = sorted(boxes, key = lambda box: box[1])
-
+    '''
     x, y, w, h = boxes.pop(0)
     height = [0, 90, 172, 247, 360, 435, h]
     for idx in range(len(height)-1):
         boxes.append((x, y+height[idx], w, height[idx+1]-height[idx]))
     boxes = sorted(boxes, key = lambda box: box[1])    
-    
-    for idx, box in enumerate(boxes[:len(boxes)-1]):
+    '''
+    for idx, box in enumerate(boxes):
         x, y, w, h = box
         cv2.imwrite(f'{save_path}/part_3_{idx+1}.jpg', part_3[y:y+h, x:x+w])
-
-image_path = './data/images/031.jpg'
-separate_parts(image_path)
