@@ -10,11 +10,11 @@ def print_embeddings(embeddings):
         print(embedding[:10])
         print()
 
-def get_embedding_model(embedding_model):
-    if(embedding_model == 'openai'):
+def get_embedding_model(model_name):
+    if(model_name == 'openai'):
         model = OpenAIEmbeddings() 
         return model
-    elif(embedding_model == 'huggingface'):
+    elif(model_name == 'huggingface'):
         model = HuggingFaceEmbeddings(model_name = 'jhgan/ko-sroberta-nli',
                                       model_kwargs = {'device': 'cpu'},
                                       encode_kwargs = {'normalize_embedding': True})
@@ -30,8 +30,8 @@ def get_huggingface_embeddings(splits):
     embeddings = model.embed_documents(splits)
     return embeddings
 
-def save_embeddings(splits, embeddings, embedding_model, vectorstore_path):
-    model =  get_embedding_model(embedding_model)
+def save_embeddings(splits, embeddings, model_name, vectorstore_path):
+    model =  get_embedding_model(model_name)
     embeddings = list(zip(splits, embeddings))
     vectorstore = FAISS.from_embeddings(text_embeddings = embeddings,
                                         embedding = model,
