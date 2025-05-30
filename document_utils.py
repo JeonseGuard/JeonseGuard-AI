@@ -21,12 +21,14 @@ def get_document(document_path):
     return document
 
 def get_splits(document):
-    splits = []
+    document = re.sub(r'부칙 \<[^>]+\>.*', '', document, flags = re.DOTALL) # 부칙 제거
 
-    contents = document.split('\n \n')[1:]
-    contents = [re.sub(r'\s{2,}', ' ', content.replace('\n', ''))
-                for content in contents]
-    for content in contents:
-        splits.append(content)
+    splits = document.split('\n \n')[2:-1]# 줄바꿈으로 나눠진 조항 분리
+    splits = [split.strip() for split in splits] # 앞뒤 공백 제거
+    splits = [re.sub(r' {2,}', ' ', split) for split in splits] # 2개 이상의 공백은 하나로 변경
+    splits = [re.sub('\n', '', split) for split in splits] # 줄바꿈 제거
+    splits = [split for split in splits if not re.match(r'제\d+[편장절관]', split)] # 편장절 제거
+    splits = [re.sub(r'\<[^>]+\>', '', split) for split in splits] # 개정, 신설 등 보조문 제거
+    splits = [re.sub(r'\[[^]]+\]', '', split) for split in splits] # 개정, 신설 등 보조문 제거
     
     return splits
