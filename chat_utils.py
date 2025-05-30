@@ -15,42 +15,35 @@ def join_relevant_documents(relevant_documents):
 
 def get_prompt(template_name):
     clauses_template = '''
-    당신에게 OCR로 추출된 법적 조항 텍스트인 OCR Text와 추가로, OCR Text와 관련된 법적 문맥인 Legal Context가 주어집니다.
-    Legal Context는 민법 조항, 주택임대차보호법 조항, 주택임대차보호법 시행령 조항을 포함하고 있습니다.
-    OCR Text의 각 조와 Legal Text의 각 조는 같은 곳에서 발췌된 조항이 아니므로 서로 같은 내용이 아닐 수 있습니다.
-    당신이 할 일은 Legal Context의 내용을 참조하여 OCR Text의 내용에서 부정확한 내용이 있는지 확인하고 발견하고 부정확한 내용이 발견되면 올바른 해석으로 설명하는 것입니다.
+    당신에게 앞으로 "임대차 계약서"의 조항들과 추가로, "민법"과 "주택 임대차 보호법"에서 발췌한 조항들이 주어집니다. 당신의 임무를 제공 하겠습니다.
+    1. "임대차 계약서"의 내용을 꼼꼼하게 확인하세요. 임대인과 임차인을 헷갈리면 안됩니다.
+    2. "민법"과 "주택 임대차 보호법"에서 발췌한 조항들을 참조하여 "임대차 계약서"의 내용을 확인하고 부정확한 내용이 있는 경우 올바르게 설명하세요.
+    2-1. "민법"과 "주택 임대차 보호법"을 참조 할 때, 직접적인 연관이 없는 조항이나 중복되는 조항은 제외하고 참조하세요.
+    2-2. "민법"의 조항들 중 "제565조"와 "제615조"는 각각 매매와 사용대차에서 발췌한 조항이지만 모두 계약서에 적용 가능한 조항들입니다.
+    2-3. "임대차 계약서"의 조항을 확인할 때 완벽하게 잘못된 표현에만 집중하고, 나머지 내용에 대해서는 유연하게 대응하세요.
 
-    ### 이제 OCR Text를 제공하겠습니다.
-    OCR Text:
+    # "임대차 계약서":
     {text}
 
-    ### 다음으로 Legal Context를 제공하겠습니다.
-    Legal Context:
-    @민법
+    # "민법":
     {context1}
 
-    @주택임대차보호법
+    # "주택 임대차 보호법":
     {context2}
 
-    @주택임대차보호법 시행령
-    {context3}
-
-    ### 마지막으로 답변 형식을 제공하겠습니다.
-    우선 부정확한 내용이 없는 경우 "조항에서 이상여부를 발견하지 못했습니다."라고만 답변 해주세요.
-    부정확한 내용이 발견된 경우 답변 형식은 아래를 따라 주시고 각 형식 당 200자 내외로 친절하게 답변해주세요.
-    * 제 O조: 부정확한 내용과 올바른 해석
+    마지막으로 답변 형식을 제공하겠습니다.
+    1. 부정확한 내용이 없는 경우의 답변은 "조항에서 이상여부를 발견하지 못했습니다."라고만 답변 해주세요.
+    2. 부정확한 내용이 발견된 경우의 답변은 "제 O조: ..."의 형식을 따르고 각 형식당 150토큰(1~2줄 정도)내로 답변 해주세요. 반드시 부정확한 내용이 발견된 조항에 대해서만 적용 해주세요.
     '''
 
     sc_template = '''
-    당신에게 OCR로 추출된 텍스트인 특약사항이 주어집니다.
-    당신이 할 일은 특약사항을 요악하고 도움이 될 만한 부연 설명을 덧붙여 설명하는 것입니다.
+    당신에게 "특약사항" 7개가 주어집니다. 
+    당신이 할 일은 먼저 "특약사항"을 요악하고 도움이 될 만한 부연 설명을 덧붙여 설명하는 것입니다.
 
-    ### 이제 특약사항을 제공하겠습니다.
-    특약사항:
+    #특약사항:
     {text}
 
-    ### 마지막으로 답변 형식을 제공하겠습니다.
-    답변 형식은 400자 내외로 친절하게 답변 해주세요.
+    답변은 400토큰(4~5줄 정도)내로 친절하게 답변 해주세요.
     '''
 
     if template_name == 'clauses':
@@ -66,26 +59,28 @@ def get_clauses_response(ocr_text):
     vectorstore_paths = ['./data/vectorstore/민법', './data/vectorstore/주택임대차보호법', './data/vectorstore/주택임대차보호법 시행령']
     vectorstore1 = FAISS.load_local(folder_path = vectorstore_paths[0], embeddings = embedding_model, allow_dangerous_deserialization=True)
     vectorstore2 = FAISS.load_local(folder_path = vectorstore_paths[1], embeddings = embedding_model, allow_dangerous_deserialization=True)
-    vectorstore3 = FAISS.load_local(folder_path = vectorstore_paths[2], embeddings = embedding_model, allow_dangerous_deserialization=True)
+    #vectorstore3 = FAISS.load_local(folder_path = vectorstore_paths[2], embeddings = embedding_model, allow_dangerous_deserialization=True)
 
-    retreiver1 = vectorstore1.as_retriever(search_type = 'mmr', search_kwargs = {'fetch_k': 50,
-                                                                                 'k': 10,
-                                                                                 'lambda_mult': 1})
-    retreiver2 = vectorstore2.as_retriever(search_type = 'mmr', search_kwargs = {'fetch_k': 40,
-                                                                                 'k': 8,
+    retreiver1 = vectorstore1.as_retriever(search_type = 'mmr', search_kwargs = {'k': 3,
                                                                                  'lambda_mult': 0.7})
-    retreiver3 = vectorstore3.as_retriever(search_type = 'mmr', search_kwargs = {'fetch_k': 40,
-                                                                                 'k': 8,
+    retreiver2 = vectorstore2.as_retriever(search_type = 'mmr', search_kwargs = {'k': 3,
                                                                                  'lambda_mult': 0.7})
+    #retreiver3 = vectorstore3.as_retriever(search_type = 'mmr', search_kwargs = {'k': 3,
+    #                                                                             'lambda_mult': 0.7})
 
-    relevant_documents1 = join_relevant_documents(retreiver1.invoke(ocr_text))
-    relevant_documents2 = join_relevant_documents(retreiver2.invoke(ocr_text))
-    relevant_documents3 = join_relevant_documents(retreiver3.invoke(ocr_text))
+    queries = ['임차권 양도, 전대, 원상회복', '차임 연체, 해지', '임대인의 의무', '해약금, 해제', '이행지체, 손해배상', '임대차 기간']
+    relevant_documents1 = ""
+    for query in queries[:-1]:
+        relevant_documents1 += join_relevant_documents(retreiver1.invoke(query))
+    relevant_documents2 = join_relevant_documents(retreiver2.invoke(queries[-1]))
 
     prompt = get_prompt('clauses')
     llm = ChatOpenAI(model = chat_model, temperature = 0, max_tokens = 1000)
     chain = prompt | llm | StrOutputParser()
-    response = chain.invoke({'text': ocr_text, 'context1': relevant_documents1, 'context2': relevant_documents2, 'context3': relevant_documents3})
+    response = chain.invoke({'text': ocr_text, 'context1': relevant_documents1, 'context2': relevant_documents2})
+
+    print(relevant_documents1)
+    print(relevant_documents2)
 
     return response
 
