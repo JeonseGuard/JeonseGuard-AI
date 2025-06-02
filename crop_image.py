@@ -92,7 +92,7 @@ def separate_part_3(part_3_path):
     
     part_3 = cv2.imread(part_3_path)
     binary_image = get_binary_image(part_3)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1500, 20))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1500, 30))
     dilated_image = cv2.dilate(binary_image, kernel, iterations = 3)
     contours, _ = cv2.findContours(dilated_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     

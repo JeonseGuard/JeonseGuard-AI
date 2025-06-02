@@ -199,6 +199,9 @@ def get_part_3_info(images, dict):
     result1 = get_ocr_result(images[0], 'kor', config)
     result2 = get_ocr_result(images[1], 'kor', config)
 
+    print(f'조항: {result1}')
+    print(f'특약사항: {result2}')
+
     dict["clausesResponse"] = get_clauses_response(result1)
     dict["scResponse"] = get_sc_response(result2)
     
