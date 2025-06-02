@@ -42,14 +42,16 @@ async def upload_image(file:UploadFile = File(...)):
             image = cv2.imread(part_path)
             if image is None:
                 raise HTTPException(status_code = 500, detail = f"이미지 파일 로드 실패: {part_path}")
+            images.append(image)
         dict = get_part_2_info(images, dict)
 
         part_paths = [f'{seperate_path}/part_3_{i}.jpg' for i in range(1, 3)]
-        images = [cv2.imread(part_path) for part_path in part_paths]
+        images = []
         for part_path in part_paths:
             image = cv2.imread(part_path)
             if image is None:
                 raise HTTPException(status_code = 500, detail = f"이미지 파일 로드 실패: {part_path}")
+            images.append(image)
         dict = get_part_3_info(images, dict)
 
         jsons_path = './data/jsons'
