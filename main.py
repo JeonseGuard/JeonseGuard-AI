@@ -1,4 +1,4 @@
-from crop_image import separate_parts
+from crop_utils import separate_parts
 from ocr_utils import get_part_1_info, get_part_2_info, get_part_3_info
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 import numpy as np
