@@ -1,6 +1,7 @@
 from crop_utils import separate_parts
 from ocr_utils import get_part_1_info, get_part_2_info, get_part_3_info
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import cv2
 import os
@@ -12,6 +13,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 app = FastAPI()
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["http://localhost:3000"],
+                   allow_credentials=True,
+                   allow_methods=["*"],
+                   allow_headers=["*"])
 
 @app.post("/upload_image")
 async def upload_image(file:UploadFile = File(...)):
