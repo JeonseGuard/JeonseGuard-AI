@@ -18,9 +18,9 @@ def get_prompt(template_name):
     당신에게 앞으로 "임대차 계약서"의 조항들과 추가로, "민법"과 "주택 임대차 보호법"에서 발췌한 조항들이 주어집니다. 당신의 임무를 제공 하겠습니다.
     1. "임대차 계약서"의 내용을 꼼꼼하게 확인하세요. 임대인과 임차인을 헷갈리면 안됩니다.
     2. "민법"과 "주택 임대차 보호법"에서 발췌한 조항들을 참조하여 "임대차 계약서"의 내용을 확인하고 부정확한 내용이 있는 경우 올바르게 설명하세요.
-    2-1. "민법"과 "주택 임대차 보호법"을 참조 할 때, 직접적인 연관이 없는 조항이나 중복되는 조항은 제외하고 참조하세요.
-    2-2. "민법"의 조항들 중 "제565조"와 "제615조"는 각각 매매와 사용대차에서 발췌한 조항이지만 모두 계약서에 적용 가능한 조항들입니다.
-    2-3. "임대차 계약서"의 조항을 확인할 때 완벽하게 잘못된 표현에만 집중하고, 나머지 내용에 대해서는 유연하게 대응하세요.
+    3. "민법"과 "주택 임대차 보호법"을 참조 할 때, 직접적인 연관이 없는 조항이나 중복되는 조항은 제외하고 참조하세요.
+    4. "민법"의 조항들 중 "제565조"와 "제615조"는 각각 매매와 사용대차에서 발췌한 조항이지만 모두 계약서에 적용 가능한 조항들입니다.
+    5. "임대차 계약서"의 조항을 확인할 때 완벽하게 잘못된 표현에만 집중하고, 나머지 내용에 대해서는 유연하게 대응하세요.
 
     # "임대차 계약서":
     {text}
@@ -43,7 +43,9 @@ def get_prompt(template_name):
     #특약사항:
     {text}
 
-    답변은 400토큰(4~5줄 정도)내로 친절하게 답변 해주세요.
+    마지막으로 답변 형식을 제공 하겠습니다.
+    1. "특약사항 요약입니다. ..."의 형식을 따라주세요.
+    2. 답변은 400토큰(4~5줄 정도)내로 친절하게 답변 해주세요.
     '''
 
     if template_name == 'clauses':
@@ -75,7 +77,7 @@ def get_clauses_response(ocr_text):
     relevant_documents2 = join_relevant_documents(retreiver2.invoke(queries[-1]))
 
     prompt = get_prompt('clauses')
-    llm = ChatOpenAI(model = chat_model, temperature = 0, max_tokens = 1000)
+    llm = ChatOpenAI(model = chat_model, temperature = 0, max_tokens = 500)
     chain = prompt | llm | StrOutputParser()
     response = chain.invoke({'text': ocr_text, 'context1': relevant_documents1, 'context2': relevant_documents2})
 
